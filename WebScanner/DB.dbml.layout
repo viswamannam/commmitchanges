@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11, 8.625" name="DB">
+  <DataContextMoniker Name="/DBDataContext" />
+  <nestedChildShapes>
+    <classShape Id="4ba50f8a-c4f7-43e7-ac67-ac559f05dad8" absoluteBounds="3, 0.5, 2, 1.3862939453125005">
+      <DataClassMoniker Name="/DBDataContext/vw_LookUpvalue" />
+      <nestedChildShapes>
+        <elementListCompartment Id="8113a01e-0995-42fd-bbe9-5f13825a0258" absoluteBounds="3.0150000000000006, 0.96, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="5b4063db-1218-43b4-8bbf-7b1877892327" absoluteBounds="8, 0.625, 2, 1.3862939453124996">
+      <DataClassMoniker Name="/DBDataContext/vw_TransactionType" />
+      <nestedChildShapes>
+        <elementListCompartment Id="12476897-9538-4509-8ce9-358ca6404ac6" absoluteBounds="8.015, 1.0850000000000009, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="9ee83df0-215f-4670-a3e5-97efc036feff" absoluteBounds="0.625, 0.5, 2, 3.1170068359375">
+      <DataClassMoniker Name="/DBDataContext/vw_Filed" />
+      <nestedChildShapes>
+        <elementListCompartment Id="3f5b597e-8776-46ca-a270-78857f4a33f8" absoluteBounds="0.64000000000000012, 0.96, 1.9700000000000002, 2.5570068359375" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="d919d724-a618-4b72-a969-7c90f41a40ff" absoluteBounds="3.25, 2.375, 2, 1.7708968098958331">
+      <DataClassMoniker Name="/DBDataContext/tlbTransaction_Detail" />
+      <nestedChildShapes>
+        <elementListCompartment Id="b7829cae-f9cd-4966-8113-beb2d2d2049f" absoluteBounds="3.2649999999999997, 2.835, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="5d260970-eb82-4f16-8d2a-d217c5c1413b" absoluteBounds="3.25, 5.25, 2, 1.3862939453125">
+      <DataClassMoniker Name="/DBDataContext/tlbTransaction_Master" />
+      <nestedChildShapes>
+        <elementListCompartment Id="b2e25971-9d62-4ad6-a1cd-d9fad85e98fb" absoluteBounds="3.265, 5.71, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(4.25 : 5.25); (4.25 : 4.14589680989583)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/DBDataContext/tlbTransaction_Master/tlbTransaction_Master_tlbTransaction_Detail" />
+      <nodes>
+        <classShapeMoniker Id="5d260970-eb82-4f16-8d2a-d217c5c1413b" />
+        <classShapeMoniker Id="d919d724-a618-4b72-a969-7c90f41a40ff" />
+      </nodes>
+    </associationConnector>
+    <classShape Id="e83f14ee-59ac-4830-9aa8-948651009fab" absoluteBounds="5.5, 0.625, 2, 1.7708968098958331">
+      <DataClassMoniker Name="/DBDataContext/vw_LogicalRecordType" />
+      <nestedChildShapes>
+        <elementListCompartment Id="c5d69107-108c-4224-b14d-5cf6fb029d27" absoluteBounds="5.515, 1.085, 1.9700000000000002, 1.2108968098958333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="c339a839-eb68-49b7-8264-fd57e98c2e7c" absoluteBounds="0.75, 4.25, 2, 4.0785139973958326">
+      <DataClassMoniker Name="/DBDataContext/vw_TranactionFiled" />
+      <nestedChildShapes>
+        <elementListCompartment Id="1d3f2b69-0682-43ab-aeb2-3868a513127e" absoluteBounds="0.765, 4.71, 1.9700000000000002, 3.518513997395833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+  </nestedChildShapes>
+</ordesignerObjectsDiagram>

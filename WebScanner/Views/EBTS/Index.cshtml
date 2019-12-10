@@ -1,0 +1,109 @@
+﻿@model WebScanner.ViewModels.Enrollment.NewEnrollmentFormViewModel
+@{
+    ViewBag.Title = "Index";
+    string mainurl = System.Configuration.ConfigurationManager.AppSettings["mainurl"];
+}
+<h1>Enrollment</h1>
+<div class="">
+    <ul>
+        @Html.Raw(ViewBag.ErrorList)
+    </ul>
+</div>
+
+<div class="row">
+    <div class="col">
+        <ul class="list-group">
+            <li class="list-group-item"><a href="#" class="btn btn-primary stretched-link d-block" data-toggle="modal" data-target="#PersonModal">Creat New Enrollment</a></li>
+            <li class="list-group-item"><a href="#" class="btn btn-primary stretched-link d-block">Edit Enrollment</a></li>
+        </ul>
+    </div>
+    <form id="Enrolement" method="post" action="@mainurl/EBTS/AddNewEnrollment">
+        @Html.AntiForgeryToken()
+        <!-- Transaction Type Modal -->
+        <!--
+        <div class="modal fade" id="TransactionTypModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title" id="exampleModalLongTitle">Select Transaction Type</h2>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        @*<div style="overflow-y: scroll;height:300px">
+                            <ul class="list-group">
+                                @if (ViewBag.userdetails!=null)
+                                { 
+                                foreach (var item in ViewBag.userdetails)
+                                    {
+                                            <li class="list-group-item"><a href='@mainurl/EBTS/NewEnrollment/@item.Identifier' class="btn btn-primary stretched-link d-block">@item.Description</a></li>
+                                    }
+                                }
+                            </ul>
+                        </div>*@
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Transaction Type Modal -->
+        
+        <!-- Person Modal -->
+        <div class="modal fade" id="PersonModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title" id="exampleModalLongTitle">New Enrollment</h2>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="form-group">
+                            <label for="IdentifierCode">Select Transaction Type *</label>
+                            <select name="IdentifierCode" class="form-control" id="IdentifierCode" required>
+                                @if (ViewBag.userdetails != null)
+                                {
+                                    foreach (var item in ViewBag.userdetails)
+                                    {
+                                        <option value="@item.Identifier">@item.Description</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+
+                            <div class="form-group">
+                                <label for="firstname">Name *</label>
+                                <input type="text" class="form-control" id="fullname" placeholder="Type name. This field is required." name="fullname" />
+                                <div class="invalid-feedback">Please type full name.</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Aliases">Aliases</label>
+                                <input type="text" class="form-control" id="Aliases" placeholder="Type aliases" name="Aliases" />
+
+                            </div>
+
+                            @*<div class="form-group">
+                <label for="lastname">Last Name *</label>
+                <input type="text" class="form-control" id="lastname" placeholder="Type last name. This field is required." name="lastname" />
+                <div class="valid-feedback">Valid.</div>
+                <div class="invalid-feedback">Please type last name.</div>
+            </div>*@
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Person Modal -->
+    </form>
+</div>

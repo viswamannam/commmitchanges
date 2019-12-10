@@ -1,0 +1,182 @@
+﻿@using System.Text.RegularExpressions;
+@{
+    ViewBag.Title = "New Enrollment";
+}
+
+@*@using (Html.BeginForm("NewEnrollment", "EBTS", FormMethod.Post, new { id = "frmEBTS" }))
+{*@
+<form id="frmEBTS">
+<h1>New Enrollment</h1>
+<input type="hidden" name="Identifier" value="@ViewBag.Identifier" />
+<input type="hidden" name="trantype" value="@ViewBag.trantype" />
+
+    <!-- The navbar - The <a> elements are used to jump to a section in the scrollable area -->
+    <nav class="navbar-expand-sm bg-dark navbar-dark fixed-top">
+        <ul class="navbar-nav">
+            <li><a href="#section1">Section 1</a></li>
+          </ul>
+     </nav>
+
+<ul class="list-group list-group-horizontal navbar">
+    @if (ViewBag.LogicalRecordTypes != null)
+    {
+        foreach (var item in ViewBag.LogicalRecordTypes)
+        {
+            <li class="list-group-item"><a href='/EBTS/NewEnrollment/@item.Identifier?trantype=@item.TypeNumber' class="nav-link">@item.Description</a></li>
+        }
+    }
+</ul>
+<div class="row" data-spy="scroll" data-target=".navbar" data-offset="1">
+  
+    @if (ViewBag.Field != null)
+    {
+        <div class="col">
+            <div>
+                <span class="alert alert-info" name="message" id="message"></span>
+            </div>
+            @foreach (var item in ViewBag.Field)
+            {
+                <div class="col">
+                    <label for='@item.FieldName'>@item.Description:</label>
+                    @{
+                        string FieldType = item.DateTypeId.ToString();
+                        switch (FieldType)
+                        {
+                            case "1":
+                                <input type="text" class="form-control" name="@item.FieldName"
+                                       value="@if (ViewBag.Transaction != null)
+                                            {
+                                            foreach (var tranitem in ViewBag.Transaction)
+                                            {
+                                                if (tranitem.Transaction_FieldID == item.FieldId)
+                                                {
+                                                @tranitem.Transaction_Value;
+                                                }
+                                            }
+                                            }" />
+                                break;
+                            case "2":
+                                <input class="form-control" type="text" name="@item.FieldName" id="@item.FieldName" value="@if (ViewBag.Transaction != null)
+                                                    {
+                                                    foreach (var tranitem in ViewBag.Transaction)
+                                                    {
+                                                        if (tranitem.Transaction_FieldID == item.FieldId)
+                                                        {
+                                                        @tranitem.Transaction_Value;
+                                                        }
+                                                    }
+                                                    }" />
+                                                    <script type="text/javascript">
+                                                        $(function () {
+                                                            $("#@item.FieldName").datepicker();
+                                                        });
+                                                    </script>
+                                break;
+                            case "4":
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" name="@item.FieldName" readonly id="@item.FieldName"
+                                           value="@if (ViewBag.Transaction != null)
+                                                    {
+                                                    foreach (var tranitem in ViewBag.Transaction)
+                                                    {
+                                                        if (tranitem.Transaction_FieldID == item.FieldId)
+                                                        {
+                                                        @tranitem.Transaction_Value;
+                                                        }
+                                                    }
+                                                    }" />
+                                    <div class="input-group-append">
+                                        <a class="input-group-text" href="#" onclick="javascript:FillLookUpValues('@item.Description','@item.FieldId',@item.FieldName)" data-toggle="modal" data-target="#LookupModal">Select...</a>
+                                    </div>
+                                </div>
+                                break;
+                        }
+                    }
+                </div>
+
+                        }
+       
+            <div class="form">
+                <input type="submit" class="btn btn-info" value="POST Form" />
+                <input type="button" onclick="javascript:postfrom()" class="btn btn-info" value="POST With JQuery" />
+            </div>
+            </div>
+            <!-- </div>-->
+            }
+        </div>
+                    <!--}-->
+        </form>
+    <!-- Modal -->
+    <div class="modal fade" id="LookupModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="selectvalue"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <input type="text" id="txtSearch" class="btn" style="width:90%" />
+                <div class="modal-body">
+                    <div style="overflow-y: scroll;height:350px">
+                        <ul class="list-group" id="ul">
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Modal -->
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $("#txtSearch").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#ul li").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+
+        function FillLookUpValues(headertext, findfiltervalue,callbackid)
+        {
+            var idstring = "";
+            $('#selectvalue').text(headertext);
+            $('#ul li').remove();
+            $("#txtSearch").val('');
+            $.each(LookupList.LookUp, function (key, val) {
+                if (val.FieldID == findfiltervalue)
+                {
+                    $('#ul').append("<li class='nav-item list-group-item'><a href='#' onclick=javascript:WriteLookupValue('"+  val.description.replace(/\s/g, "_") + "'," +  callbackid.id + ")>" + val.description + "</a></li>");
+                }
+            });
+        }
+        function WriteLookupValue(whattowrite,wheretowrite)
+        {
+            $("#" + wheretowrite.id).attr('value', whattowrite);
+            $("#LookupModal").modal('hide');
+            $("#" + wheretowrite.id).focus
+        }
+
+
+        function postfrom()
+        {
+            $.ajax({
+                type: "POST",
+                data: new FormData($("#frmEBTS")[0]),
+                url: "/EBTS/NewEnrollment/CNA?trantype=1",
+                dataType: 'html',
+                contentType: false,
+                processData: false,               
+                success: function (data) {
+                    alert(data);
+                    $('#message').html(data);
+                }
+
+            });
+        }
+    </script>
+

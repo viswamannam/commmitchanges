@@ -1,0 +1,298 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace WebScanner.Controllers.EBTS
+{
+    public class EBTSController : Controller
+    {
+        // GET: EBTS
+        public ViewResult Index()
+        {
+            DBDataContext db = new DBDataContext();
+            var data  = db.vw_TransactionTypes.ToList();
+            ViewBag.userdetails = data;
+            if (TempData["Error"] != null)
+            {
+                ViewBag.ErrorList= TempData["Error"].ToString();
+            }
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult AddNewEnrollment(WebScanner.Models.EBTS.Person person)
+        {
+            string strSQL;
+            var ViewModelPerson = new WebScanner.ViewModels.Enrollment.NewEnrollmentFormViewModel
+            {
+                 Person= person
+            };
+
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"]= "";
+                    var modelErrors = new List<string>();
+                    foreach (var modelState in ModelState.Values)
+                    {
+                        foreach (var modelError in modelState.Errors)
+                        {
+                            TempData["Error"] = TempData["Error"] + "<li>" + modelError.ErrorMessage + "</li>";
+                        }
+                    }
+            
+                return RedirectToAction("Index", "EBTS", ViewModelPerson);
+            }
+            var RandomNumber = new Random();
+
+            //if (Session["Transaction_ID"] == null || Session["Transaction_ID"].ToString() == "")
+            //{
+
+            DBDataContext db = new DBDataContext();
+            //var fld = db.vw_Fileds.Where(f => f.Identifier == person.IdentifierCode).Select(f => new { f.Identifier, f.TotTypeId });
+
+           string NewRandomNumber= RandomNumber.Next(10000000, 99999999).ToString();
+
+           var vwDistinctLogicalRecordType = db.vw_LogicalRecordTypes.Where(col => col.Identifier == person.IdentifierCode).Select(col => new { col.TransactionTypeId }).Distinct();
+
+            foreach (var row in vwDistinctLogicalRecordType)
+            {
+                strSQL = @"INSERT INTO [dbo].[tlbTransaction_Master]
+                           ([Transaction_ID]
+                            ,[Transaction_TypeId]
+                           ,[Transaction_Desc])
+                     VALUES
+                           (" + NewRandomNumber + "," + row.TransactionTypeId + ",'')";
+                try
+                {
+                    db.ExecuteCommand(strSQL);
+                }
+                catch (Exception ex)
+                {
+                    return Content("Error saving data!");
+                }
+            }
+            string DisplayFieldName = "";
+            int FieldNumber = 0;
+            var vwLogicalRecordType = db.vw_LogicalRecordTypes.Where(col => col.Identifier == person.IdentifierCode).Select(col =>new { col.Identifier,col.TotTypeId });
+            foreach (var row in vwLogicalRecordType)
+            {
+                var vwFields = db.vw_Fileds.Where(col => col.Identifier == person.IdentifierCode && col.TotTypeId == row.TotTypeId).Select(col => new { col.TotTypeId, col.FieldId });
+                FieldNumber = 0;
+
+                foreach (var fieldRow in vwFields)
+                {
+                    FieldNumber = FieldNumber + 1;
+                    DisplayFieldName = "Field" + FieldNumber.ToString();
+
+                    strSQL = @"INSERT INTO [dbo].[tlbTransaction_Detail]
+                               ([Transaction_ID]
+                               ,[Transaction_TotTypeId]
+                               ,[Transaction_FieldID]
+                               ,[Transaction_Value]
+                               ,[Transaction_DisplayFieldName])
+                         VALUES
+                               (" + NewRandomNumber + ","
+                          + fieldRow.TotTypeId + ","
+                          + fieldRow.FieldId + ",'"
+                          + "" + "','"
+                          + DisplayFieldName + "')";
+                    db.ExecuteCommand(strSQL);
+                }
+            }
+            //Aliases FieldID= 33
+            //Name FieldID= 31
+
+
+            //string personfullname = person.LastName + ", " + person.FirstName + " " + person.MiddleName;
+
+            //strSQL = @"UPDATE [dbo].[tlbTransaction_Detail]
+            //                        SET [Transaction_Value]='" + personfullname + "'"
+            //    + "WHERE [Transaction_ID]=" + Session["Transaction_ID"] + " "
+            //    + "AND [Transaction_FieldID]=" + row.FieldId;
+
+            //db.ExecuteCommand(strSQL);
+
+            //strSQL = @"UPDATE [dbo].[tlbTransaction_Detail]
+            //            SET [Transaction_Value]='" + personfullname + "' "
+            //    + "WHERE [Transaction_ID]=" + NewRandomNumber + " "
+            //    + "AND [Transaction_FieldID]=" + 31 + ""
+            //    ;
+            //db.ExecuteCommand(strSQL);
+
+            int TOTTyepeID = 0;
+            //var fieldlist = from field in db.vw_Fileds
+            //                where field.Identifier == person.IdentifierCode
+            //                && field.FieldId == 31
+            //                select field.TotTypeId;
+
+            var fieldlist = db.vw_Fileds.Where(col => col.Identifier == person.IdentifierCode && col.FieldId == 31).Select(col => new { col.TotTypeId }).SingleOrDefault();
+
+
+            //foreach (var rowvalue in fieldlist)
+            //{
+            //    TOTTyepeID = rowvalue.TotTypeId;
+            //}
+
+
+            //    var trandetail = (from tranactiondetail in db.tlbTransaction_Details
+            //                 where tranactiondetail.Transaction_ID == Convert.ToInt32(NewRandomNumber)
+            //                && tranactiondetail.Transaction_FieldID == 31
+            //                && tranactiondetail.Transaction_TotTypeId == TOTTyepeID
+            //                select tranactiondetail).SingleOrDefault(); ;
+
+            //trandetail.Transaction_Value = personfullname;
+            //foreach (tlbTransaction_Detail  tran in trandetail)
+            //{
+            //    tran.Transaction_Value = personfullname;
+            //}
+
+            //db.SubmitChanges();
+
+            strSQL = @"UPDATE [dbo].[tlbTransaction_Detail]
+                        SET [Transaction_Value]='" + person.FullName + "' "
+                + "WHERE [Transaction_ID]=" + NewRandomNumber + " "
+                + "AND [Transaction_FieldID]=" + 31 + ""
+                + "AND Transaction_TotTypeId=" + fieldlist.TotTypeId;
+            db.ExecuteCommand(strSQL);
+
+            return RedirectToAction("NewEnrollment/" + person.IdentifierCode, "EBTS", new { transactionid = NewRandomNumber });
+        }
+
+      [HttpPost]
+        public ActionResult NewEnrollment(string Identifier, FormCollection frm)
+        {
+
+            double tempInt = 0;
+            string trantype = frm["trantype"];
+            bool result = false;
+
+            //if (Session["Transaction_ID"] == null || Session["Transaction_ID"].ToString() == "")
+            //{
+            //    return RedirectToAction("Index", "EBTS");
+            //}
+
+            if (trantype != null)
+            {
+                result = double.TryParse(trantype, out tempInt);
+            }
+
+            if (!result)
+            {
+                return Content("Something went wrong!");
+            }
+            //string forminvalue = string.Join(",", frm.AllKeys);
+            DBDataContext db = new DBDataContext();
+
+            string fldname = "";
+            //frm.AllKeys.ToList().Contains(fld.FieldName)
+
+            //db.ExecuteQuery<Customer>("select * from dbo.Customers where City = {0}", "London");
+
+            int rccount = db.tlbTransaction_Masters.Where(m => m.Transaction_ID == Convert.ToInt32(Session["Transaction_ID"])).Count();
+
+            if (rccount < 1)
+            {
+                string strSQL = @"INSERT INTO [dbo].[tlbTransaction_Master]
+                           ([Transaction_ID]
+                           ,[Transaction_TotTypeId]
+                           ,[Transaction_Desc])
+                     VALUES
+                           (" + Session["Transaction_ID"] + "," + tempInt + "," + "''" + ")";
+                try
+                {
+                    db.ExecuteCommand(strSQL);
+                }
+                catch
+                {
+                    return Content("Error saving data!");
+                }
+            }
+            var fldlist =
+                      from fld in db.vw_Fileds.Where(f => f.IsAutoGenerated == false).OrderBy(f => f.FieldId)
+                      where fld.TypeNumber == tempInt && fld.Identifier == Identifier && frm.AllKeys.ToList().Contains(fld.FieldName)
+                      select (fld);
+
+
+            string Transaction_ID = "";
+
+            foreach (var row in fldlist.ToList())
+            {
+                rccount = db.tlbTransaction_Details.Where(fldrow => fldrow.Transaction_ID == Convert.ToInt32(Session["Transaction_ID"]) && fldrow.Transaction_FieldID == row.FieldId).Count();
+                fldname = frm[row.FieldName];
+                             
+                if (rccount < 1)
+                {
+                    string strSQL = @"INSERT INTO [dbo].[tlbTransaction_Detail]
+                               ([Transaction_ID]
+                               ,[Transaction_TypeNumber]
+                               ,[Transaction_FieldID]
+                               ,[Transaction_Value])
+                         VALUES
+                               (" + Session["Transaction_ID"] + ","
+                              + row.TypeNumber + ","
+                              + row.FieldId + ",'"
+                              + fldname + "')";
+                    db.ExecuteCommand(strSQL);
+                    Transaction_ID = row.TypeNumber.ToString();
+                }
+                else
+                {
+                    string strSQL = @"UPDATE [dbo].[tlbTransaction_Detail]
+                                    SET [Transaction_Value]='" + fldname + "'"
+                                    + "WHERE [Transaction_ID]=" + Session["Transaction_ID"] + " "
+                                    + "AND [Transaction_FieldID]=" + row.FieldId;
+
+                    db.ExecuteCommand(strSQL);
+                }
+            }
+            return Content("Data saved!");
+
+            //return RedirectToAction ("NewEnrollment", new { trantype = Transaction_ID });
+        }
+        [HttpGet]
+        public ViewResult NewEnrollment(string id)
+        {
+            string Identifier = id;
+            double tempInt = 0;
+            string TOTTypeNumber = Request.QueryString["TotType"];
+            string transactionid = Request.QueryString["transactionid"];
+
+            if (transactionid != null)
+            {
+                 if(!double.TryParse(transactionid, out tempInt))
+                {
+                    return View();
+                }
+            }
+
+            if (TOTTypeNumber != null)
+            {
+                if (!double.TryParse(TOTTypeNumber, out tempInt))
+                {
+                    return View();
+                }
+            }
+
+            DBDataContext db = new DBDataContext();
+            //Left Menu
+            var LogicalRecordTypes = db.vw_LogicalRecordTypes.Where(l =>  l.Identifier== Identifier.ToString() ).ToList();
+            //Display Header
+            var TransactionType = db.vw_TransactionTypes.Where(f => f.Identifier == Identifier.ToString()).ToList() ;
+            ViewBag.TransactionType = TransactionType;
+            ViewBag.LogicalRecordTypes = LogicalRecordTypes;
+            ViewBag.Field = null;
+            if (TOTTypeNumber != null)
+            {
+                //string identifier = Identifier.ToString();
+                IQueryable<vw_TranactionFiled> field = db.vw_TranactionFileds.Where(f =>  f.Identifier == Identifier && f.Transaction_TotTypeId == Convert.ToInt32(TOTTypeNumber) && f.Transaction_ID== Convert.ToInt32(transactionid) && f.IsAutoGenerated==false);
+                ViewBag.Field = field;
+               return View( new { transactionid = transactionid });
+            }
+            //return View();
+            return View(new { transactionid = transactionid });
+        }
+    }
+}

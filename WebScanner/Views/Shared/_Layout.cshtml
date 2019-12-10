@@ -1,0 +1,78 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    @{ 
+        string mainurl = System.Configuration.ConfigurationManager.AppSettings["mainurl"];
+    }
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="@mainurl/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="@mainurl/Content/page.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="@mainurl/Content/bootstrap.min.css">
+    <link rel="stylesheet" href="@mainurl/Content/jquery-ui.css">
+    <link rel="stylesheet" href="@mainurl/Content/jquery.ui.datepicker.css">
+    <script src="@mainurl/Scripts/bootstrap.min.js"></script>
+    <script src="@mainurl/Scripts/jquery.min.js"></script>
+    <script src="@mainurl/Scripts/bootstrap.min.js"></script>
+    <script src="@mainurl/Scripts/jquery-ui.js"></script>
+    <script src="@mainurl/Scripts/Lookup.js"></script>
+    <style>
+        .activemenu
+        {
+              border: none;
+              outline: none;
+              padding: 10px 16px;
+              background-color: #f1f1f1;
+              cursor: pointer;
+
+        }
+    </style>
+
+</head>
+<body>
+    <div class="container-fluid" style="margin-bottom:0;background-image: url('@mainurl/Content/images/hhs-banner2.jpg'); height:38px;">
+        <div style="float: left">
+            <img src="@mainurl/Content/images/hhs-banner1.jpg" alt="HHS" />
+        </div>
+        <div style="float: right">
+            <img src="@mainurl/Content//images/hhs-banner3.jpg" alt="HHS" />
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-sm navbar-light">
+        <div class="container-fluid">
+            <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navb">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navb">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nnavbar-brand">
+                        @Html.ActionLink("Home", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                    </li>
+                    <li class="nnavbar-brand">
+                        @Html.ActionLink("Account", "Index", "Account", new { area = "" }, new { @class = "navbar-brand" })
+                    </li>
+                    <li class="nnavbar-brand">
+                        @Html.ActionLink("Enrollment", "Index", "EBTS", new { area = "" }, new { @class = "navbar-brand" })
+                    </li>
+                </ul>
+                <input type="text" role="textbox" class="form-control mr-sm-1 search" id="txtsearch" placeholder="Search Events" />
+                <a href="javascript:gotosearchpage();" class="btn btn-success my-2 my-sm-0" role="button">Search</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container" style="margin-top:30px">
+        @RenderBody()
+    </div>
+
+    <footer class="footer-outer" role="contentinfo">
+        <div class="footer-right">
+            <img src="https://intranet.hhs.gov/sites/default/themes/hhsintranet-subtheme/assets/img/hhs-seal-white.svg" alt="HHS Seal" class="footer-seal">
+        </div>
+    </footer>
+
+</body>
+</html>

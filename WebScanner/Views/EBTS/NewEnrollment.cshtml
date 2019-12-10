@@ -1,0 +1,207 @@
+﻿@using System.Text.RegularExpressions;
+@using WebScanner.Models.EBTS;
+@using System;
+@model WebScanner.Models.EBTS.PersonViewModel
+
+@{
+    ViewBag.Title = "New Enrollment";
+    string mainurl = System.Configuration.ConfigurationManager.AppSettings["mainurl"];
+}
+
+<form id="frmEBTS" method="post" action="/EBTS/NewEnrollment/@ViewBag.Identifier?trantype=@ViewBag.trantype">
+    @Html.AntiForgeryToken()
+ 
+
+    <h1>New Enrollment</h1>
+    
+    @if (ViewBag.TransactionType != null)
+    {
+    foreach (var item in ViewBag.TransactionType)
+    {
+        <h2>@item.Description</h2>
+    }
+    }
+    <p>Required Fields *</p>
+        <div class="row">
+            <div class="col-sm-3">
+                <ul class="nav nav-pills flex-column">
+                    @if (ViewBag.LogicalRecordTypes != null)
+                    {
+                        foreach (var item in ViewBag.LogicalRecordTypes)
+                        {
+                            <li class="nav-item"><a href='/EBTS/NewEnrollment/@item.Identifier?TotType=@item.TotTypeId&transactionid=@Request.QueryString["transactionid"]' class="nav-link">@item.Description</a></li>
+                        }
+                    }
+                    <li class="nav-item"><a href='/EBTS/Prints?transactionid=@Request.QueryString["transactionid"]' class="nav-link">Fingerprints</a></li>
+
+                </ul>
+            </div>
+            <div class="col-sm-9">
+                <div class="row">
+                @if (ViewBag.Field != null)
+                {
+                        foreach (var item in ViewBag.Field)
+                        {
+                            <div class="col-sm-5">
+                                <div class="form-group">
+                                    
+                                    @{
+                                        string FieldType = item.DateTypeId.ToString();
+                                        switch (FieldType)
+                                        {
+                                            case "1":
+                                                <label for='@item.FieldName'>
+                                                @item.Description
+                                                @if (item.IsRequiredByField == true)
+                                                { <span>*</span>}
+                                                </label>
+                                                <input type="text" class="form-control" name="@item.FieldName"
+                                                       value="@item.Transaction_Value" />
+
+                                                break;
+                                            case "2":
+                                                <label for='@item.FieldName'>@item.Description</label>
+                                                <input class="datepicker form-control" type="text" name="@item.FieldName" id="@item.FieldName.ToString().Replace("[", "").Replace("]", "").Replace(".", "")" value="@item.Transaction_Value"/>
+                                                    <script type="text/javascript">
+                                                        $(function () {
+                                                            $("#@item.FieldName.ToString().Replace("[", "").Replace("]", "").Replace(".", "")").datepicker();
+                                                        });
+                                                    </script>
+                                                break;
+                                            case "4":
+                                                <label for='@item.FieldName'>@item.Description</label>
+                                                <div class="input-group mb-3">
+                                                    <input type="text" class="form-control" name="@item.FieldName" readonly id="@item.FieldName"
+                                                           value="@item.Transaction_Value" />
+                                                    <div class="input-group-append">
+                                                        <a class="input-group-text" href="#" onclick="javascript:FillLookUpValues('@item.Description','@item.FieldId','@item.FieldName')" data-toggle="modal" data-target="#LookupModal">Select...</a>
+                                                    </div>
+                                                </div>
+                                                break;
+                                            default:
+                                                <label for='@item.FieldName'>
+                                                    @item.Description
+                                                    @if (item.IsRequiredByField == true)
+                                                    { <span>*</span>}
+                                                </label>
+                                                <input type="text" class="form-control" name="@item.FieldName"
+                                                       value="@item.Transaction_Value" />
+                                                break;
+
+                                        }
+                                    }
+                                    <small class="form-text text-muted"></small>
+                                </div>
+                            </div>
+                           }
+                       }
+                </div>
+
+                @if (ViewBag.Field != null)
+                {
+                    <div class="form">
+                        <input type="button" onclick="javascript:postfrom()" class="btn btn-info" value="Save" />
+                        <a class="button" href="@System.Configuration.ConfigurationManager.AppSettings["mainurl"]">Cancel</a>
+                    </div>
+                }
+            </div>
+        </div>
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="LookupModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="selectvalue"></div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+           
+            <div class="modal-body">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text">Search</label>
+                    </div>
+                    <input type="text" id="txtSearch" class="form-control" placeholder="" />
+                </div>
+
+
+                        <div style="overflow-y: scroll;height:350px">
+                            <ul class="list-group" id="ul"></ul>
+                        </div>
+           </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+</div>
+<!-- End Modal -->
+<script type="text/javascript">
+
+        $(document).ready(function () {
+            $("#txtSearch").on("keyup", function () {
+                                                var value = $(this).val().toLowerCase();
+                $("#ul li").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+                                            });
+                                        });
+
+        function FillLookUpValues(headertext, findfiltervalue,callbackid)
+                {
+                    var idstring = "";
+                    $('#selectvalue').text(headertext);
+                    $('#ul li').remove();
+                    $("#txtSearch").val('');
+                    $.each(LookupList.LookUp, function (key, val) {
+
+                        if (val.FieldID == findfiltervalue)
+                        {
+                            $('#ul').append("<li class='nav-item list-group-item'><a href='#' onclick=javascript:WriteLookupValue('"+  val.description.replace(/\s/g, "_") + "','" +  callbackid + "')>" + val.description + "</a></li>");
+                        }
+                    });
+                }
+      
+        
+       function WriteLookupValue(whattowrite,wheretowrite)
+       {
+            $("[name ='" + wheretowrite + "']").attr('value', whattowrite);
+            $("#LookupModal").modal('hide');
+            $("#" + wheretowrite.id).focus
+        }
+
+                                        //                url: "/EBTS/NewEnrollment/CNA?trantype=1",
+
+           function postfrom()
+           {
+            $.ajax({
+                type: "POST",
+                data: new FormData($("#frmEBTS")[0]),
+                url: "@mainurl/EBTS/NewEnrollment/@ViewBag.Identifier?transactionid=@Request.QueryString["transactionid"]&TotType=@Request.QueryString["TotType"]",
+                dataType: 'html',
+                contentType: false,
+                processData: false,
+                success: function (data)
+                {
+                    alert(data);
+                    $('#message').html(data);
+                }
+                });
+            }
+
+        $(document).ready(function () {
+            var page = window.location.href;
+            var limenu = $('.col-sm-3 ul li a');
+            $.each(limenu, function (index, value) {
+                if (value == page) {
+                    $(value).addClass('active');
+                        return;
+                }
+            });
+        });
+
+</script>
+

@@ -1,0 +1,191 @@
+﻿@using System.Text.RegularExpressions;
+@{
+    ViewBag.Title = "New Enrollment";
+}
+
+<h1>New Enrollment</h1>
+@using (Html.BeginForm("NewEnrollment", "EBTS", FormMethod.Post, new { id = "frmEBTS" }))
+{
+
+<input type="hidden" name="Identifier" value="@ViewBag.Identifier" />
+<input type="hidden" name="trantype" value="@ViewBag.trantype" />
+
+<div class="row">
+    <div class="col-sm-3">
+        <div class="card">
+            <ul class="nav flex-column list-group">
+
+                @foreach (var item in ViewBag.LogicalRecordTypes)
+                {
+                    <li class="nav-item"><a href='/EBTS/NewEnrollment/@item.Identifier?trantype=@item.TypeNumber' class="nav-link">@item.Description</a></li>
+                }
+            </ul>
+
+            </div>
+        </div>
+    @if (!IsPost)
+    {
+if (ViewBag.Field != null)
+{
+    <div class="col-sm-8">
+       
+        @foreach (var item in ViewBag.Field)
+        {
+            <div class="form-check mb-2 mr-sm-2">
+                <label for='@item.FieldName'>@item.Description:</label>
+                @{ 
+                    string FieldType = item.DateTypeId.ToString();
+                    switch (FieldType)
+                    {
+                        case "1":
+                            <input type="text" class="form-control" name="@item.FieldName" value="@Request.Form[item.FieldName]" />
+                            break;
+                        case "2":
+                            <input class="form-control" type="text" name="@item.FieldName" value="@Request.Form[item.FieldName]" />
+                            <script type="text/javascript">
+                                $(function () {
+                                    $("#@item.FieldName").datepicker();
+                                });
+                            </script>
+                            break;
+                        case "4":
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" name="@item.FieldName" value="@Request.Form[item.FieldName]"  readonly id="@item.FieldName" />
+                                <div class="input-group-append">
+                                    <a class="input-group-text" href="#" onclick="javascript:FillLookUpValues('@item.Description','@item.FieldId',@item.FieldName)" data-toggle="modal" data-target="#LookupModal">Select...</a>
+                                </div>
+                            </div>
+                            break;
+                    }
+                }
+            </div>
+           }
+
+        <div class="form-check mb-2 mr-sm-2">        
+            <input type="submit" class="btn btn-info" value="POST Form"/>
+            <input type="button" onclick="javascript:postfrom()" class="btn btn-info" value="POST With JQuery"/>
+        </div>
+    </div>
+                        }
+                    }
+                    else
+                    {
+                        if (ViewBag.Field != null)
+                        {
+                            <div class="col-sm-8">
+
+                                @foreach (var item in ViewBag.Field)
+                                {
+                                    <div class="form-check mb-2 mr-sm-2">
+                                        <label for='@item.FieldName'>@item.Description:</label>
+                                        @{
+                                            string FieldType = item.DateTypeId.ToString();
+                                            switch (FieldType)
+                                            {
+                                                case "1":
+                                                    <input type="text" class="form-control" name="@item.FieldName" id="@item.FieldName" />
+                                                    break;
+                                                case "2":
+                                                    <input class="form-control" type="text" name="@item.FieldName" id="@item.FieldName" />
+                                                    <script type="text/javascript">
+                                $(function () {
+                                    $("#@item.FieldName").datepicker();
+                                });
+                                                    </script>
+                                                    break;
+                                                case "4":
+                                                    <div class="input-group mb-3">
+                                                        <input type="text" class="form-control" name="@item.FieldName" readonly id="@item.FieldName" />
+                                                        <div class="input-group-append">
+                                                            <a class="input-group-text" href="#" onclick="javascript:FillLookUpValues('@item.Description','@item.FieldId',@item.FieldName)" data-toggle="modal" data-target="#LookupModal">Select...</a>
+                                                        </div>
+                                                    </div>
+                                                    break;
+                                            }
+                                        }
+                                    </div>
+                                    }
+                                <div class="form-check mb-2 mr-sm-2">
+                                    <input type="submit" class="btn btn-info" value="POST Form" />
+                                    <input type="button" onclick="javascript:postfrom()" class="btn btn-info" value="POST With JQuery" />
+                                </div>
+                            </div>
+                                                }
+                                            }
+</div>
+}
+    <!-- Modal -->
+    <div class="modal fade" id="LookupModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="selectvalue"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <input type="text" id="txtSearch" class="btn" style="width:90%" />
+                <div class="modal-body">
+                    <div style="overflow-y: scroll;height:350px">
+                        <ul class="list-group" id="ul">
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Modal -->
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $("#txtSearch").on("keyup", function () {
+                var value = $(this).val().toLowerCase();
+                $("#ul li").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+
+        function FillLookUpValues(headertext, findfiltervalue,callbackid)
+        {
+            var idstring = "";
+            $('#selectvalue').text(headertext);
+            $('#ul li').remove();
+            $("#txtSearch").val('');
+            $.each(LookupList.LookUp, function (key, val) {
+                if (val.FieldID == findfiltervalue)
+                {
+                    $('#ul').append("<li class='nav-item list-group-item'><a href='#' onclick=javascript:WriteLookupValue('"+  val.description.replace(/\s/g, "_") + "'," +  callbackid.id + ")>" + val.description + "</a></li>");
+                }
+            });
+        }
+        function WriteLookupValue(whattowrite,wheretowrite)
+        {
+            $("#" + wheretowrite.id).attr('value', whattowrite);
+            $("#LookupModal").modal('hide');
+            $("#" + wheretowrite.id).focus
+        }
+
+
+        function postfrom()
+        {
+            $.ajax({
+                type: "POST",
+                data: new FormData($("#frmEBTS")[0]),
+                url: "/EBTS/NewEnrollment/CNA?trantype=1",
+                dataType: 'html',
+                contentType: false,
+                processData: false,               
+                success: function (data) {
+                    alert(data);
+                    $('#message').html(data);
+                }
+
+            });
+        }
+
+    </script>
+

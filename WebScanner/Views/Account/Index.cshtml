@@ -1,0 +1,72 @@
+﻿@model WebScanner.Models.Account.Account
+
+@{
+    ViewBag.Title = "Log On";
+
+}
+
+@*<h1>Log on</h1>
+<div class="row">
+    <div class="col-sm-4 text-left">
+        <div class="form-group">
+            <label for="txtUserName">User Name:</label>
+            <input  type="text" class="form-control" aria-describedby="hlpFromDate" placeholder="Type or select from date" required id="txtUserName" />
+            <small id="hlpFromDate" class="form-text text-muted">Type your user name (e.g email.address@hhs.gov)</small>
+        </div>
+    </div>
+    <div class="col-sm-4 text-left">
+        <div class="form-group">
+            <label for="txtPassword" class="float-left">Password:</label>
+            <input type="password"  class="form-control" ID="txtPassword"  placeholder="Type password" required>
+            <small id="hlpFromDate" class="form-text text-muted">Password is case sensitive.</small>
+        </div>
+    </div>
+    
+       
+    
+</div>
+<button type="submit" id="cmdSubmit" class="btn btn-primary">Click for loging</button>*@
+<h1>Log On</h1>
+@if (TempData["ErrorMSG"] != null)
+{
+    <label style="color:maroon;">@TempData["ErrorMSG"] </label>
+            <br /><br />
+}
+<h2>Warning!!!!!!!!!!!!!!!!!!!!!!!!!</h2>
+<ul class="list-group">
+<li class="list-group-item">You are accessing a U.S. Government information system, which includes (1) this computer, (2) this computer network, (3) all computers connected to this network, and (4) all devices and storage media attached to this network or to a computer on this network. This information system is provided for U.S. Government-authorized use only.</li>
+<li class="list-group-item">Unauthorized or improper use of this system may result in disciplinary action, as well as civil and criminal penalities.</li>
+<li class="list-group-item">By using this information system, you understand and consent to the following:
+    <ul class="list-group">
+        <li class="list-group-item">You have no reasonable expectation of privacy regarding any communications or data transiting or stored on this information system. At any time, and for any lawful Government purpose, the government may monitor, intercept, and search and seize any communication, or data transiting or stored on this information system.</li>
+        <li class="list-group-item">Any communication or data transiting or stored on this information system may be disclosed or used for any lawful Government purpose.</li>
+</ul>
+</ul>
+<hr />
+    @using (Html.BeginForm("Index", "Account", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(s => s.ReturnURL)
+
+        <div class="row">
+
+            <div class="col-sm-4 text-left">
+                <div class="form-group">
+                    <label for="Username">User Name:</label>
+                    @Html.TextBoxFor(s => s.Username, new { @placeholder = "Username", @class = "form-control", @required = "" })
+                    <small id="hlpFromDate" class="form-text text-muted">Type your user name (e.g email.address@hhs.gov)</small>
+                </div>
+            </div>
+            <div class="col-sm-4 text-left">
+                <div class="form-group">
+                    <label for="Password" class="float-left">Password:</label>
+                    @Html.PasswordFor(s => s.Password, new { @placeholder = "Password", @class = "form-control", @required = "" })
+                    <small id="hlpFromDate" class="form-text text-muted">Password is case sensitive.</small>
+                </div>
+            </div>
+            
+        </div>
+        <a class="btn btn-primary" href="@System.Configuration.ConfigurationManager.AppSettings["mainurl"]/EBTS" >Login</a>
+        <button type="submit" value="Login"></button>
+    }
+      
